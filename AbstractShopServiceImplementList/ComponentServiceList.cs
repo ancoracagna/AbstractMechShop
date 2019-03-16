@@ -19,84 +19,67 @@ namespace AbstractShopServiceImplementList
         }
         public List<AutoPartsViewModel> GetList()
         {
-            List<AutoPartsViewModel> result = new List<AutoPartsViewModel>();
-            for (int i = 0; i < source.Components.Count; ++i)
+            List<AutoPartsViewModel> result = source.Components.Select(rec => new AutoPartsViewModel
             {
-                result.Add(new AutoPartsViewModel
-                {
-                    Id = source.Components[i].Id,
-                    AutoPartsName = source.Components[i].AutoPartsName
-                });
-            }
+                Id = rec.Id,
+                AutoPartsName = rec.AutoPartsName
+            })
+ .ToList();
             return result;
         }
         public AutoPartsViewModel GetElement(int id)
         {
-            for (int i = 0; i < source.Components.Count; ++i)
+            Component element = source.Components.FirstOrDefault(rec => rec.Id == id);
+            if (element != null)
             {
-                if (source.Components[i].Id == id)
+                return new AutoPartsViewModel
                 {
-                    return new AutoPartsViewModel
-                    {
-                        Id = source.Components[i].Id,
-                        AutoPartsName = source.Components[i].AutoPartsName
-                    };
-                }
+                    Id = element.Id,
+                    AutoPartsName = element.AutoPartsName
+                };
             }
             throw new Exception("Элемент не найден");
         }
         public void AddElement(AutoPartsBindingModel model)
         {
-            int maxId = 0;
-            for (int i = 0; i < source.Components.Count; ++i)
+            Component element = source.Components.FirstOrDefault(rec => rec.AutoPartsName == model.AutoPartsName);
+            if (element != null)
             {
-                if (source.Components[i].Id > maxId)
-                {
-                    maxId = source.Components[i].Id;
-                }
-                if (source.Components[i].AutoPartsName == model.AutoPartsName)
-                {
-                    throw new Exception("Уже есть компонент с таким названием");
-                }
+                throw new Exception("Уже есть компонент с таким названием");
             }
+            int maxId = source.Components.Count > 0 ? source.Components.Max(rec =>
+           rec.Id) : 0;
             source.Components.Add(new Component
             {
                 Id = maxId + 1,
                 AutoPartsName = model.AutoPartsName
-            });
+            });        
         }
         public void UpdElement(AutoPartsBindingModel model)
         {
-            int index = -1;
-            for (int i = 0; i < source.Components.Count; ++i)
+            Component element = source.Components.FirstOrDefault(rec => rec.AutoPartsName == model.AutoPartsName && rec.Id != model.Id);
+            if (element != null)
             {
-                if (source.Components[i].Id == model.Id)
-                {
-                    index = i;
-                }
-                if (source.Components[i].AutoPartsName == model.AutoPartsName &&
-                source.Components[i].Id != model.Id)
-                {
-                    throw new Exception("Уже есть компонент с таким названием");
-                }
+                throw new Exception("Уже есть компонент с таким названием");
             }
-            if (index == -1)
+            element = source.Components.FirstOrDefault(rec => rec.Id == model.Id);
+            if (element == null)
             {
                 throw new Exception("Элемент не найден");
             }
-            source.Components[index].AutoPartsName = model.AutoPartsName;
+            element.AutoPartsName = model.AutoPartsName;
         }
         public void DelElement(int id)
         {
-            for (int i = 0; i < source.Components.Count; ++i)
+            Component element = source.Components.FirstOrDefault(rec => rec.Id == id);
+            if (element != null)
             {
-                if (source.Components[i].Id == id)
-                {
-                    source.Components.RemoveAt(i);
-                    return;
-                }
+                source.Components.Remove(element);
             }
-            throw new Exception("Элемент не найден");
+            else
+            {
+                throw new Exception("Элемент не найден");
+            }
         }      
     }
 }

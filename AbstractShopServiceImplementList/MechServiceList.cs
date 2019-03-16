@@ -19,104 +19,64 @@ namespace AbstractShopServiceImplementList
         }
         public List<ServiceViewModel> GetList()
         {
-            List<ServiceViewModel> result = new List<ServiceViewModel>();
-            for (int i = 0; i < source.Services.Count; ++i)
-            {
-                // требуется дополнительно получить список компонентов для изделия и их                
- List<ServiceComponentViewModel> ServiceComponents = new
-List<ServiceComponentViewModel>();
-                for (int j = 0; j < source.ServiceComponent.Count; ++j)
-                {
-                    if (source.ServiceComponent[j].ServiceId == source.Services[i].Id)
-                    {
-                        string autoPartsName = string.Empty;
-                        for (int k = 0; k < source.Components.Count; ++k)
-                        {
-                            if (source.ServiceComponent[j].ComponentId ==
-                           source.Components[k].Id)
-                            {
-                                autoPartsName = source.Components[k].AutoPartsName;
-                                break;
-                            }
-                        }
-                        ServiceComponents.Add(new ServiceComponentViewModel
-                        {
-                            Id = source.ServiceComponent[j].Id,
-                            ServiceId = source.ServiceComponent[j].ServiceId,
-                            ComponentId = source.ServiceComponent[j].ComponentId,
-                            AutoPartsName = autoPartsName,
-                            Count = source.ServiceComponent[j].Count
-                        });
-                    }
-                }
-                result.Add(new ServiceViewModel
-                {
-                    Id = source.Services[i].Id,
-                    ServiceName = source.Services[i].ServiceName,
-                    Price = source.Services[i].Price,
-                    ServiceComponents = ServiceComponents
-                });
-            }
-            return result;
-        }
+            List<ServiceViewModel> result = source.Services
+    .Select(rec => new ServiceViewModel
+    {
+        Id = rec.Id,
+        ServiceName = rec.ServiceName,
+        Price = rec.Price,
+        ServiceComponents = source.ServiceComponent
+             .Where(recPC => recPC.ServiceId == rec.Id)
+             .Select(recPC => new ServiceComponentViewModel
+              {
+              Id = recPC.Id,
+              ServiceId = recPC.ServiceId,
+               ComponentId = recPC.ComponentId,
+               AutoPartsName = source.Components.FirstOrDefault(recC =>
+               recC.Id == recPC.ComponentId)?.AutoPartsName,
+               Count = recPC.Count
+               })
+              .ToList()
+        })
+        .ToList();
+    return result;
+    }
         public ServiceViewModel GetElement(int id)
         {
-            for (int i = 0; i < source.Services.Count; ++i)
+            Service element = source.Services.FirstOrDefault(rec => rec.Id == id);
+            if (element != null)
             {
-                // требуется дополнительно получить список компонентов для изделия и их                
-            List<ServiceComponentViewModel> ServiceComponent = new
-List<ServiceComponentViewModel>();
-                for (int j = 0; j < source.ServiceComponent.Count; ++j)
+                return new ServiceViewModel
                 {
-                    if (source.ServiceComponent[j].ServiceId == source.Services[i].Id)
-                    {
-                        string autoPartsName = string.Empty;
-                        for (int k = 0; k < source.Components.Count; ++k)
-                        {
-                            if (source.ServiceComponent[j].ComponentId ==
-                           source.Components[k].Id)
-                            {
-                                autoPartsName = source.Components[k].AutoPartsName;
-                                break;
-                            }
-                        }
-                        ServiceComponent.Add(new ServiceComponentViewModel
-                        {
-                            Id = source.ServiceComponent[j].Id,
-                            ServiceId = source.ServiceComponent[j].ServiceId,
-                            ComponentId = source.ServiceComponent[j].ComponentId,
-                            AutoPartsName = autoPartsName,
-                            Count = source.ServiceComponent[j].Count
-                        });
-                    }
-                }
-                if (source.Services[i].Id == id)
+                    Id = element.Id,
+                    ServiceName = element.ServiceName,
+                    Price = element.Price,
+                    ServiceComponents = source.ServiceComponent
+                .Where(recPC => recPC.ServiceId == element.Id)
+                .Select(recPC => new ServiceComponentViewModel
                 {
-                    return new ServiceViewModel
-                    {
-                        Id = source.Services[i].Id,
-                        ServiceName = source.Services[i].ServiceName,
-                        Price = source.Services[i].Price,
-                        ServiceComponents = ServiceComponent
-                    };
-                }
+                    Id = recPC.Id,
+                    ServiceId = recPC.ServiceId,
+                    ComponentId = recPC.ComponentId,
+                    AutoPartsName = source.Components.FirstOrDefault(recC =>
+     recC.Id == recPC.ComponentId)?.AutoPartsName,
+                    Count = recPC.Count
+                })
+               .ToList()
+                };
             }
             throw new Exception("Элемент не найден");
         }
         public void AddElement(ServiceBindingModel model)
         {
-            int maxId = 0;
-            for (int i = 0; i < source.Services.Count; ++i)
+            Service element = source.Services.FirstOrDefault(rec => rec.ServiceName ==
+model.ServiceName);
+            if (element != null)
             {
-                if (source.Services[i].Id > maxId)
-                {
-                    maxId = source.Services[i].Id;
-                }
-                if (source.Services[i].ServiceName == model.ServiceName)
-                {
-                    throw new Exception("Уже есть изделие с таким названием");
-                }
+                throw new Exception("Уже есть изделие с таким названием");
             }
+            int maxId = source.Services.Count > 0 ? source.Services.Max(rec => rec.Id) :
+           0;
             source.Services.Add(new Service
             {
                 Id = maxId + 1,
@@ -124,146 +84,99 @@ List<ServiceComponentViewModel>();
                 Price = model.Price
             });
             // компоненты для изделия
-            int maxPCId = 0;
-            for (int i = 0; i < source.ServiceComponent.Count; ++i)
-            {
-                if (source.ServiceComponent[i].Id > maxPCId)
-                {
-                    maxPCId = source.ServiceComponent[i].Id;
-                }
-            }
+            int maxPCId = source.ServiceComponent.Count > 0 ?
+           source.ServiceComponent.Max(rec => rec.Id) : 0;
             // убираем дубли по компонентам
-            for (int i = 0; i < model.ServiceComponents.Count; ++i)
-            {
-                for (int j = 1; j < model.ServiceComponents.Count; ++j)
-                {
-                    if (model.ServiceComponents[i].ComponentId ==
-                    model.ServiceComponents[j].ComponentId)
-                    {
-                        model.ServiceComponents[i].Count +=
-                        model.ServiceComponents[j].Count;
-                        model.ServiceComponents.RemoveAt(j--);
-                    }
-                }
-            }
+            var groupComponents = model.ServiceComponents
+            .GroupBy(rec => rec.ComponentId)
+           .Select(rec => new
+           {
+               ComponentId = rec.Key,
+               Count = rec.Sum(r => r.Count)
+           });
             // добавляем компоненты
-            for (int i = 0; i < model.ServiceComponents.Count; ++i)
+            foreach (var groupComponent in groupComponents)
             {
                 source.ServiceComponent.Add(new ServiceComponent
                 {
                     Id = ++maxPCId,
                     ServiceId = maxId + 1,
-                    ComponentId = model.ServiceComponents[i].ComponentId,
-                    Count = model.ServiceComponents[i].Count
+                    ComponentId = groupComponent.ComponentId,
+                    Count = groupComponent.Count
                 });
             }
         }
         public void UpdElement(ServiceBindingModel model)
         {
-            int index = -1;
-            for (int i = 0; i < source.Services.Count; ++i)
+            Service element = source.Services.FirstOrDefault(rec => rec.ServiceName ==
+model.ServiceName && rec.Id != model.Id);
+            if (element != null)
             {
-                if (source.Services[i].Id == model.Id)
-                {
-                    index = i;
-                }
-                if (source.Services[i].ServiceName == model.ServiceName &&
-                source.Services[i].Id != model.Id)
-                {
-                    throw new Exception("Уже есть изделие с таким названием");
-                }
+                throw new Exception("Уже есть изделие с таким названием");
             }
-            if (index == -1)
+            element = source.Services.FirstOrDefault(rec => rec.Id == model.Id);
+            if (element == null)
             {
                 throw new Exception("Элемент не найден");
             }
-            source.Services[index].ServiceName = model.ServiceName;
-            source.Services[index].Price = model.Price;
-            int maxPCId = 0;
-            for (int i = 0; i < source.ServiceComponent.Count; ++i)
-            {
-                if (source.ServiceComponent[i].Id > maxPCId)
-                {
-                    maxPCId = source.ServiceComponent[i].Id;
-                }
-            }
+            element.ServiceName = model.ServiceName;
+            element.Price = model.Price;
+            int maxPCId = source.ServiceComponent.Count > 0 ?
+           source.ServiceComponent.Max(rec => rec.Id) : 0;
             // обновляем существуюущие компоненты
-            for (int i = 0; i < source.ServiceComponent.Count; ++i)
+            var compIds = model.ServiceComponents.Select(rec =>
+           rec.ComponentId).Distinct();
+            var updateComponents = source.ServiceComponent.Where(rec => rec.ServiceId ==
+           model.Id && compIds.Contains(rec.ComponentId));
+            foreach (var updateComponent in updateComponents)
             {
-                if (source.ServiceComponent[i].ServiceId == model.Id)
-                {
-                    bool flag = true;
-                    for (int j = 0; j < model.ServiceComponents.Count; ++j)
-                    {
-                        // если встретили, то изменяем количество
-                        if (source.ServiceComponent[i].Id ==
-                       model.ServiceComponents[j].Id)
-                        {
-                            source.ServiceComponent[i].Count =
-                           model.ServiceComponents[j].Count;
-                            flag = false;
-                            break;
-                        }
-                    }
-                    // если не встретили, то удаляем
-                    if (flag)
-                    {
-                        source.ServiceComponent.RemoveAt(i--);
-                    }
-                }
+                updateComponent.Count = model.ServiceComponents.FirstOrDefault(rec =>
+               rec.Id == updateComponent.Id).Count;
             }
+            source.ServiceComponent.RemoveAll(rec => rec.ServiceId == model.Id &&
+           !compIds.Contains(rec.ComponentId));
             // новые записи
-            for (int i = 0; i < model.ServiceComponents.Count; ++i)
+            var groupComponents = model.ServiceComponents
+            .Where(rec => rec.Id == 0)
+           .GroupBy(rec => rec.ComponentId)
+           .Select(rec => new
+           {
+               ComponentId = rec.Key,
+               Count = rec.Sum(r => r.Count)
+           });
+            foreach (var groupComponent in groupComponents)
             {
-                if (model.ServiceComponents[i].Id == 0)
+                ServiceComponent elementPC = source.ServiceComponent.FirstOrDefault(rec
+               => rec.ServiceId == model.Id && rec.ComponentId == groupComponent.ComponentId);
+                if (elementPC != null)
                 {
-                    // ищем дубли
-                    for (int j = 0; j < source.ServiceComponent.Count; ++j)
+                    elementPC.Count += groupComponent.Count;
+                }
+                else
+                {
+                    source.ServiceComponent.Add(new ServiceComponent
                     {
-                        if (source.ServiceComponent[j].ServiceId == model.Id &&
-                        source.ServiceComponent[j].ComponentId ==
-                       model.ServiceComponents[i].ComponentId)
-                        {
-                            source.ServiceComponent[j].Count +=
-                           model.ServiceComponents[i].Count;
-                            model.ServiceComponents[i].Id =
-                           source.ServiceComponent[j].Id;
-                            break;
-                        }
-                    }
-                    // если не нашли дубли, то новая запись
-                    if (model.ServiceComponents[i].Id == 0)
-                    {
-                        source.ServiceComponent.Add(new ServiceComponent
-                        {
-                            Id = ++maxPCId,
-                            ServiceId = model.Id,
-                            ComponentId = model.ServiceComponents[i].ComponentId,
-                            Count = model.ServiceComponents[i].Count
-                        });
-                    }
+                        Id = ++maxPCId,
+                        ServiceId = model.Id,
+                        ComponentId = groupComponent.ComponentId,
+                        Count = groupComponent.Count
+                    });
                 }
             }
         }
         public void DelElement(int id)
         {
-            // удаяем записи по компонентам при удалении изделия
-            for (int i = 0; i < source.ServiceComponent.Count; ++i)
+            Service element = source.Services.FirstOrDefault(rec => rec.Id == id);
+            if (element != null)
             {
-                if (source.ServiceComponent[i].ServiceId == id)
-                {
-                    source.ServiceComponent.RemoveAt(i--);
-                }
+                // удаяем записи по компонентам при удалении изделия
+                source.ServiceComponent.RemoveAll(rec => rec.ServiceId == id);
+                source.Services.Remove(element);
             }
-            for (int i = 0; i < source.Services.Count; ++i)
+            else
             {
-                if (source.Services[i].Id == id)
-                {
-                    source.Services.RemoveAt(i);
-                    return;
-                }
-            }
-            throw new Exception("Элемент не найден");
+                throw new Exception("Элемент не найден");
+            }
         }
     }
 }

@@ -19,47 +19,36 @@ namespace AbstractShopServiceImplementList
             source = DataListSingleton.GetInstance();
         }
         public List<CustomerViewModel> GetList()
-        {
-            List<CustomerViewModel> result = new List<CustomerViewModel>();
-            for (int i = 0; i < source.Clients.Count; ++i)
+        {           
+            List<CustomerViewModel> result = source.Clients.Select(rec => new CustomerViewModel
             {
-                result.Add(new CustomerViewModel
-                {
-                    Id = source.Clients[i].Id,
-                    CustomerFIO = source.Clients[i].CustomerFIO
-                });
-            }
+                Id = rec.Id,
+                CustomerFIO = rec.CustomerFIO
+            })
+            .ToList();
             return result;
         }
         public CustomerViewModel GetElement(int id)
         {
-            for (int i = 0; i < source.Clients.Count; ++i)
+            Client element = source.Clients.FirstOrDefault(rec => rec.Id == id);
+            if (element != null)
             {
-                if (source.Clients[i].Id == id)
+                return new CustomerViewModel
                 {
-                    return new CustomerViewModel
-                    {
-                        Id = source.Clients[i].Id,
-                        CustomerFIO = source.Clients[i].CustomerFIO
-                    };
-                }
+                    Id = element.Id,
+                    CustomerFIO = element.CustomerFIO
+                };
             }
             throw new Exception("Элемент не найден");
         }
         public void AddElement(CustomerBindingModel model)
         {
-            int maxId = 0;
-            for (int i = 0; i < source.Clients.Count; ++i)
+            Client element = source.Clients.FirstOrDefault(rec => rec.CustomerFIO == model.CustomerFIO);
+            if (element != null)
             {
-                if (source.Clients[i].Id > maxId)
-                {
-                    maxId = source.Clients[i].Id;
-                }
-                if (source.Clients[i].CustomerFIO == model.CustomerFIO)
-                {
-                    throw new Exception("Уже есть клиент с таким ФИО");
-                }
+                throw new Exception("Уже есть клиент с таким ФИО");
             }
+            int maxId = source.Clients.Count > 0 ? source.Clients.Max(rec => rec.Id) : 0;
             source.Clients.Add(new Client
             {
                 Id = maxId + 1,
@@ -68,36 +57,29 @@ namespace AbstractShopServiceImplementList
         }
         public void UpdElement(CustomerBindingModel model)
         {
-            int index = -1;
-            for (int i = 0; i < source.Clients.Count; ++i)
+            Client element = source.Clients.FirstOrDefault(rec => rec.CustomerFIO == model.CustomerFIO && rec.Id != model.Id);
+            if (element != null)
             {
-                if (source.Clients[i].Id == model.Id)
-                {
-                    index = i;
-                }
-                if (source.Clients[i].CustomerFIO == model.CustomerFIO &&
-                source.Clients[i].Id != model.Id)
-                {
-                    throw new Exception("Уже есть клиент с таким ФИО");
-                }
+                throw new Exception("Уже есть клиент с таким ФИО");
             }
-            if (index == -1)
+            element = source.Clients.FirstOrDefault(rec => rec.Id == model.Id);
+            if (element == null)
             {
                 throw new Exception("Элемент не найден");
             }
-            source.Clients[index].CustomerFIO = model.CustomerFIO;
+            element.CustomerFIO = model.CustomerFIO;
         }
         public void DelElement(int id)
         {
-            for (int i = 0; i < source.Clients.Count; ++i)
+            Client element = source.Clients.FirstOrDefault(rec => rec.Id == id);
+            if (element != null)
             {
-                if (source.Clients[i].Id == id)
-                {
-                    source.Clients.RemoveAt(i);
-                    return;
-                }
+                source.Clients.Remove(element);
             }
-            throw new Exception("Элемент не найден");
+            else
+            {
+                throw new Exception("Элемент не найден");
+            }
         }
     }
 }

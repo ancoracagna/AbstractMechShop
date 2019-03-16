@@ -55,7 +55,7 @@ namespace AbstractMechShopView
             if (form.ShowDialog() == DialogResult.OK)
             {
                 LoadData();
-            }
+            }
         }
 
         private void ChangeBtn_Click(object sender, EventArgs e)

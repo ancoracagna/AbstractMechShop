@@ -16,6 +16,8 @@ namespace AbstractShopServiceImplementList
         public List<Order> Orders { get; set; }
         public List<Service> Services { get; set; }
         public List<ServiceComponent> ServiceComponent { get; set; }
+        public List<Stock> Stocks { get; set; }
+        public List<StockComponent> StockComponents { get; set; }
         private DataListSingleton()
         {
             Clients = new List<Client>();
