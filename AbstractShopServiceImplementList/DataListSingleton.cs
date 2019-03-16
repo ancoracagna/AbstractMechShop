@@ -25,8 +25,6 @@ namespace AbstractShopServiceImplementList
             Orders = new List<Order>();
             Services = new List<Service>();
             ServiceComponent = new List<ServiceComponent>();
-            Stocks = new List<Stock>();
-            StockComponents = new List<StockComponent>();
         }
         public static DataListSingleton GetInstance()
         {
