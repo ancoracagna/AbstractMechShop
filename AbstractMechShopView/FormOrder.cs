@@ -26,7 +26,8 @@ namespace AbstractMechShopView
             InitializeComponent();
             this.serviceC = serviceC;
             this.serviceP = serviceP;
-            this.serviceM = serviceM;
+            this.serviceM = serviceM;
+
         }
 
         private void FormOrder_Load(object sender, EventArgs e)
@@ -132,11 +133,6 @@ namespace AbstractMechShopView
         {
             DialogResult = DialogResult.Cancel;
             Close();
-        }
-
-        private void comboBoxClient_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }
