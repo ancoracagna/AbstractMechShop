@@ -1,7 +1,10 @@
 ﻿using AbstractShopServiceDAL.Interfaces;
 using AbstractShopServiceImplementList;
 using System;
+using AbstractShopServiceImplementDataBase;
+using AbstractShopServiceImplementDataBase.Implementations;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -27,15 +30,17 @@ namespace AbstractMechShopView
         public static IUnityContainer BuildUnityContainer()
         {
             var currentContainer = new UnityContainer();
-            currentContainer.RegisterType<IClientService, ClientServiceList>(new
+            currentContainer.RegisterType<DbContext, AbstractDbContext>(new
            HierarchicalLifetimeManager());
-            currentContainer.RegisterType<IComponentService, ComponentServiceList>(new
-HierarchicalLifetimeManager());
-            currentContainer.RegisterType<IMechService, MechServiceList>(new
+            currentContainer.RegisterType<IClientService, ClientServiceDB>(new
            HierarchicalLifetimeManager());
-            currentContainer.RegisterType<IMainService, MainServiceList>(new
+            currentContainer.RegisterType<IComponentService, ComponentServiceDB>(new
            HierarchicalLifetimeManager());
-            currentContainer.RegisterType<IStockService, StockServiceList>(new
+            currentContainer.RegisterType<IMechService, ProductServiceBD>(new
+           HierarchicalLifetimeManager());
+            currentContainer.RegisterType<IStockService, StockServiceDB>(new
+           HierarchicalLifetimeManager());
+            currentContainer.RegisterType<IMainService, MainServiceDB>(new
            HierarchicalLifetimeManager());
             return currentContainer;
         }
