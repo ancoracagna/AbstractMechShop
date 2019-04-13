@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbstractShopServiceImplemen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbstractMechShopView", "AbstractMechShopView\AbstractMechShopView.csproj", "{E9D5A835-8301-4638-9AB8-999CBC604596}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbstractShopServiceImplementDataBase", "AbstractShopServiceImplementDataBase\AbstractShopServiceImplementDataBase.csproj", "{269B26C0-82D7-4428-BBC9-F6E42A41E3EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{E9D5A835-8301-4638-9AB8-999CBC604596}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9D5A835-8301-4638-9AB8-999CBC604596}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9D5A835-8301-4638-9AB8-999CBC604596}.Release|Any CPU.Build.0 = Release|Any CPU
+		{269B26C0-82D7-4428-BBC9-F6E42A41E3EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{269B26C0-82D7-4428-BBC9-F6E42A41E3EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{269B26C0-82D7-4428-BBC9-F6E42A41E3EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{269B26C0-82D7-4428-BBC9-F6E42A41E3EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
