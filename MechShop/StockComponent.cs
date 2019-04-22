@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MechShopModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,5 +13,7 @@ namespace MechShop
         public int StockId { get; set; }
         public int ComponentId { get; set; }
         public int Count { get; set; }
+        public virtual Stock Stock { get; set; }
+        public virtual Component Component { get; set; }
     }
 }
